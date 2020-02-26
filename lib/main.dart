@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app_search/controller.dart';
 import 'package:flutter_app_search/globals.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:provider/provider.dart';
 
 import 'home.dart';
 
@@ -16,13 +17,21 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp
     ]);
 
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        accentColor: colorGreenDark,
+    return MultiProvider(
+      providers: [
+        Provider<Controller>(
+          create: (_) => Controller(),
+          dispose: (_, controler) => controler.dispose(),
+        )
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          accentColor: colorGreenDark,
+        ),
+        home: Home(),
+        debugShowCheckedModeBanner: false,
       ),
-      home: Home(),
-      debugShowCheckedModeBanner: false,
     );
   }
 }

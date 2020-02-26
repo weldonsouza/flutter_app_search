@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_app_search/globals.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter/services.dart';
 import 'package:barcode_scan/barcode_scan.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 import 'controller.dart';
@@ -27,7 +27,7 @@ class _HomeState extends State<Home> {
     try {
       String qrResult = await BarcodeScanner.scan();
 
-      result = _textControllerProdut.text = qrResult;
+      result = _textControllerProdut.text = controller.search.codbar = qrResult;
 
       setState(() {
         result = qrResult;
@@ -55,9 +55,9 @@ class _HomeState extends State<Home> {
   }
 
   returnSearch() async {
-    result = _textControllerProdut.text.toString();
+    result = controller.search.codbar;
 
-    getCodebar(result);
+    getCodbar(result);
     //_textControllerProdut.text = '';
   }
 
@@ -84,28 +84,25 @@ class _HomeState extends State<Home> {
               style: Theme.of(context).textTheme.display1,
             );
           }),*/
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            child: TextFormField(
-              controller: _textControllerProdut,
-              autofocus: false,
-              cursorColor: Colors.black87,
-              style: TextStyle(color: Colors.black87),
-              decoration: InputDecoration(
-                hintText: 'Código de barras',
-                /*suffixIcon: IconButton(
-                    icon: Icon(
-                      Icons.search,
-                      color: Colors.black87,
-                    ),
-                    onPressed: returnSearch
-                ),*/
-                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
+          Observer(builder: (_){
+            return Container(
+              padding: EdgeInsets.symmetric(horizontal: 10),
+              child: TextFormField(
+                controller: _textControllerProdut,
+                onChanged: controller.search.changeCod,
+                autofocus: false,
+                cursorColor: Colors.black87,
+                style: TextStyle(color: Colors.black87),
+                decoration: InputDecoration(
+                  hintText: 'Código de barras',
+                  errorText: controller.checkCodBar(),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
+                  disabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
+                ),
               ),
-            ),
-          ),
+            );
+          }),
           Padding(padding: EdgeInsets.only(bottom: 10)),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 6),
@@ -117,9 +114,9 @@ class _HomeState extends State<Home> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: (){
-          getCodebar('');
+          getCodbar('');
         },
-        tooltip: 'Consulta',
+        tooltip: 'Consultar',
         child: IconButton(
             icon: Icon(Icons.search, color: Colors.white),
             onPressed: returnSearch
@@ -128,19 +125,19 @@ class _HomeState extends State<Home> {
     );
   }
 
-  returnCards(){
+  returnCards() {
     List<Widget> list = [];
 
-    for(int i = 0; i < _dadosGet.length; i++){
-      if(_dadosGet[i]['id'] != '') {
+    for (int i = 0; i < _dadosGet.length; i++) {
+      if (_dadosGet[i]['id'] != '') {
         list.add(
             Card(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   ListTile(
-                    //title: Text('${_dadosGet[i]['descricao']}'),
-                    title: Text('${_dadosGet[i]['id']} - ${_dadosGet[i]['descricao']}'),
+                    title: Text('${_dadosGet[i]['descricao']}'),
+                    //title: Text('${_dadosGet[i]['id']} - ${_dadosGet[i]['descricao']}'),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -161,7 +158,7 @@ class _HomeState extends State<Home> {
     return list;
   }
 
-  Future getCodebar(codbar) async {
+  Future getCodbar(codbar) async {
     final response = await http.get('$url_api?codbar=$codbar');
     print('$url_api?codbar=$codbar');
 
